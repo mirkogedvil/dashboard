@@ -72,9 +72,6 @@ const ReportingsChart = (response) => {
               scales: {
                 y: {
                   beginAtZero: true,
-                  ticks: {
-                    stepSize: 1, // Set the step size for the y-axis
-                  },
                   title: {
                     display: true,
                     text: "Reportings Count",

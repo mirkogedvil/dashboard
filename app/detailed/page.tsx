@@ -1,8 +1,10 @@
 "use client";
 import CreatedStagesChart from "@/components/CreatedStagesChart";
 import DatabaseSelect from "@/components/DatabaseSelect";
+import ProjectTimelineChart from "@/components/ProjectTimelineChart";
 import ReportingsChart from "@/components/ReportingsChart";
 import { Button } from "@/components/ui/button";
+import { getActiveProjectsCount } from "@/helpers/dataProcessing";
 import { RefreshCwIcon } from "lucide-react";
 import React, { useEffect, useState } from "react";
 
@@ -11,6 +13,10 @@ const Detailed = () => {
   const [selectedDatabase, setSelectedDatabase] = useState(null);
   const [detailedData, setDetailedData] = useState([]);
   const [loading, setLoading] = useState(false); // State to manage loading state
+
+  const [projects, setProjects] = useState([]);
+  const [processedData, setProcessedData] = useState([]);
+  const [interval, setInterval] = useState("weekly");
 
   // Fetch data function
 
@@ -29,6 +35,12 @@ const Detailed = () => {
           throw new Error("Network response was not ok");
         const detailedResult = await (await detailedResponse.json()).data;
         setDetailedData(detailedResult);
+
+        const procData = getActiveProjectsCount(
+          detailedData.stagesForTimeline,
+          interval
+        );
+        setProcessedData(procData);
       }
     } catch (error) {
       console.error("Failed to fetch data:", error);
@@ -51,6 +63,11 @@ const Detailed = () => {
       if (!response.ok) throw new Error("Network response was not ok");
       const result = await (await response.json()).data;
       setDetailedData(result);
+      const procData = getActiveProjectsCount(
+        result.stagesForTimeline,
+        interval
+      );
+      setProcessedData(procData);
     } catch (error) {
       console.error("Failed to fetch data:", error);
     }
@@ -74,6 +91,9 @@ const Detailed = () => {
       <div className="grid gap-6 md:grid-cols-2">
         <CreatedStagesChart response={detailedData} />
         <ReportingsChart response={detailedData} />
+      </div>
+      <div className="grid gap-6 md:grid-cols-1">
+        <ProjectTimelineChart data={processedData} interval={interval} />
       </div>
     </div>
   );

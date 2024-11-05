@@ -46,6 +46,16 @@ export async function getDbData(db,host) {
     ORDER BY 
         gs.day;
   `;
+  const stagesForTimeline = await dbConnection`
+    SELECT 
+    project_id,
+    stage_code,
+    name, 
+    GREATEST(created,'2023-01-01')::DATE as start_time,
+    due_date::DATE AS end_time 
+    FROM project_stages 
+    WHERE COALESCE(due_date,NOW()::DATE) >= NOW()::DATE - INTERVAL '350 days' AND due_date IS NOT NULL AND COALESCE(due_date,NOW()::DATE) <= CURRENT_DATE + INTERVAL '350 days';
+  `;
 
   const reportings = await dbConnection`
     WITH reportings as (
@@ -79,7 +89,8 @@ export async function getDbData(db,host) {
   `;
   ret = {
     createdStages,
-    reportings
+    reportings,
+    stagesForTimeline
   }
 
   return ret;
